@@ -1,0 +1,15 @@
+\section{Conclusion and Future Work}
+\label{sec:conclusion}
+
+The Internet-of-Things is a revolution in local communication as much as in global communication, but limitations in the TCP/IP architecture and host-based addressing more generally have made dependencies on the cloud a ``path of least resistance'' for various IoT applications.
+Before IoT become an essential part of our everyday life, the implications of cloud dependencies must be addressed.
+Robust solutions to local communications will improve the user experience of IoT for early adopters.
+Counter-intuitively, it is also likely to expand the market for innovative new solutions to the long tail of dwellings (from houseboats to motorhomes) and the challenging communications conditions of ``the next billion'' in the emerging markets, where the cloud is accessible but not always reliable.  
+
+It is with these opportunities in mind that we have developed the cloud-independent design described in this paper.
+We have shown a specific design for the two fundamental functions in IoT, trust management and rendezvous, in a way that does not rely on (but can incorporate) cloud-based services.
+We have implemented a home entertainment experience in order to test a variety of device and service types (infrastructure-based sensing, wearables, mobile devices, and game engines) in a context where latency matters.
+We built our solution on top of Named Data Networking architecture, assuring resiliency of local ``smart'' IoT features in face of external failures.
+At the heart of the design are application-defined hierarchically named and secured data packets exchanged at the networking level, from which trust management and rendezvous can be built. 
+
+Significant challenges remain for the IoT and NDN research communities, many of which have been mentioned earlier.  For example, specific designs for encryption-based access control in networks with heterogeneous computational capabilities remain to be developed, as do designs for global access to the manufacturer namespace in our examples.  Application development paradigms for Named Data Networking of Things, and NDN applications in general, also remain an open area of research. 
