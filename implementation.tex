@@ -3,20 +3,46 @@
 
 We have implemented the NDN-IoT framework and a prototype of the Flow entertainment experience to verify the design introduced in the previous section.
 The implementation follows a modular structure and differentiates between the framework-level services that we believe are common to many home IoT systems and the functionality that supports Flow-specific application logic.
-This section describes details in both the framework, and components of the application.
+This section describes details in both the framework and application components.
 
 \subsection{NDN-IoT framework}
 
-The NDN-IoT framework includes an implementation of the authentication server, as well as a set of client libraries using JavaScript, Python, C\# and C++.
+The NDN-IoT framework includes an implementation of the authentication server and a set of client libraries.
+
+% AS
+The AS functionality is implemented based on the team's previous work on NDN-pi (citation: ndn-pi TR).
+The framework provides a server implementation in Python, which we run on Raspbian platform in Flow application.
+Compared with the earlier work in NDN-pi, we added ``application publishing authorization'', and ``application trust schema distribution'' to the server implementation, to handle the construction and distribution of an application trust schema. 
+The server implementation also updates the codebase to work with PyNDN2 2.0b4, with major updates to security module interface, including using CCL library's built-in public/private key storages. \footnote{We now use BasicIdentityStorage and FilePrivateKeyStorage for key storage, and ConfigPolicyManager for data verification, whereas the old implementation, developed at a time when PyNDN security library module was evolving, used custom derived classes (for example, IotPrivateKeyStorage).}
+Authentication clients are available in both Python and JavaScript in order to support application components running on Ubuntu, OSX, Raspbian, and browser (Chrome and Firefox) platforms.
+Compared with the earlier work in NDN-pi, this implementation added a port in JavaScript to support browser applications. 
+The JavaScript port uses the library's IndexedDbIdentityStorage and IndexedDbPrivateKeyStorage for key storage (this means the key storage in browser is origin-based, thus in our installation the webpage that adds this ``device'' and the webpage that publishes application content should be hosted under the same origin). 
+Recall that in NDN-pi the client device generates a device ID\footnote{The server uses this ID to construct the initial ``add device'' interest name. This ID was implemented as the CPU serial of a Raspberry Pi.}. 
+In browser application's case we generate a random string in IndexedDB if one doesn't already exist, to use as the device identification of the device that currently runs the browser.
+
+% NDN-IoT client libraries
 The NDN-IoT client libraries are built on top of the NDN Common Client Libraries~\cite{ccl}, and aims to provide abstractions to faciliate application development in a home environment. 
-The client libraries in four languages are organized into three major functional blocks:
+The client libraries are available in Python, C++, JavaScript and C\#. 
+They are organized into three major functional blocks:
+
+\textbf{Bootstrap} follows the suggestion in section VI.B and VI.C of the IoTDI '16 paper, and helps with device and application identity setup. Its abstractions include: 
 \begin{enumerate}
-\item \textit{Bootstrap}
-\item \textit{Discovery}
-\item \textit{Application-level pub/sub}
+\item KeyChain setup: given a device identity (and optionally an AS name), construct a KeyChain and set up the default device certificate name for this application instance. This KeyChain is later used for signing and verification of all application data.
+\item Consumer setup: given an application prefix, the Bootstrap module keeps outstanding interest for the application's trust schema (add example), and updates the local copy whenever a later version is received and verified.\footnote{The application trust schema may evolve over time, when new device names are added and authorized to publish under certain application prefixes}
+\item Producer setup: given an application prefix, the Bootstrap module requests authorization from the AS to publish under that prefix by sending a command interest including this device's identity and the prefix it wants to publish for (add example). If the AS authorizes the request, it adds an entry stating to the application trust schema to reflect the updated trust relationship, and publishes a new version for all consumers to fetch.
 \end{enumerate}
 
-The AS is based on the team's previous work on NDN-pi (citation: ndn-pi TR). The framework provides a server implementation in Python, since we run the AS on Rasperry Pi. Authentication clients are available in both Python and JavaScript, so that we can support application components running on Ubuntu, OSX, Raspbian, and browser platforms.
+\textbf{Discovery} uses a sync-based discovery different from suggested in section VI.B of the IoTDI '16 paper. 
+(Protocol description)
+
+\textbf{Application-level pub/sub} follows the suggestion in section VI.F of the IoTDI '16 paper, and provides the following abstractions:
+\begin{enumerate}
+\item Consumer for timestamp namespace (/prefix/[timestamp]): this consumer uses oustanding interest with range exclusion to ask for latest piece of data, and upon data retrieval and successful verification, updates the range exclusion with the received timestamp.
+\item Consumer for sequence-number namespace (/prefix/[sequence-number]): this consumer pipelines interest for the next few sequence numbers, and upon data retrieval and successful verification, issues an interest for the sequence number after the last one in the pipeline.
+\end{enumerate}
+
+(trust schema example)
+(discuss callback mechanisms?)
 
 Compared with NDN-pi, the AS implementation made the following updates (insert details), and provided a similar functioning port in JavaScript.
 
