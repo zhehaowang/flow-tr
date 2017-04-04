@@ -7,7 +7,7 @@ This section describes details in both the framework and application components.
 \subsection{NDN-IoT framework}
 
 The NDN-IoT framework is a set of libraries in Python, C++, JS and C\# built on top of the NDN Common Client Libraries.
-Each library in the framework implements the naming, trust management and rendezvous in Section~\ref{sec:components} from three functional blocks: bootstrap, discovery and application-level pub/sub.
+Each library in the framework implements naming, trust management and rendezvous in Section~\ref{sec:components}, which are organized into three functional blocks: bootstrap, discovery and application-level pub/sub.
 The overall structure of the framework is shown in Figure~\ref{fig:ndn-iot-framework-structure}.
 
 \begin{figure}[!t]
@@ -17,20 +17,9 @@ The overall structure of the framework is shown in Figure~\ref{fig:ndn-iot-frame
 \label{fig:ndn-iot-framework-structure}
 \end{figure}
 
-The rest of this subsection covers each functional block, and a description of the AS implementation available in Python and JavaScript.
-
-% AS
-The AS functionality is implemented based on the team's previous work on NDN-pi (citation: ndn-pi TR).
-The framework provides a server implementation in Python, which we run on Raspbian platform in Flow application.
-The server implementation also updates the codebase to work with PyNDN2 2.0b4, with major updates to security module interface, including using CCL library's built-in public/private key storages. \footnote{We now use BasicIdentityStorage and FilePrivateKeyStorage for key storage, and ConfigPolicyManager for data verification, whereas the old implementation, developed at a time when PyNDN security library module was evolving, used custom derived classes (for example, IotPrivateKeyStorage).}
-Authentication clients are available in both Python and JavaScript in order to support application components running on Ubuntu, OSX, Raspbian, and browser (Chrome and Firefox) platforms.
-Compared with the earlier work in NDN-pi, this implementation added a port in JavaScript to support browser applications. 
-The JavaScript port uses the library's IndexedDbIdentityStorage and IndexedDbPrivateKeyStorage for key storage (this means the key storage in browser is origin-based, thus in our installation the webpage that adds this ``device'' and the webpage that publishes application content should be hosted under the same origin). 
-Recall that in NDN-pi the client device generates a device ID\footnote{The server uses this ID to construct the initial ``add device'' interest name. This ID was implemented as the CPU serial of a Raspberry Pi.}. 
-In browser application's case we generate a random string in IndexedDB if one doesn't already exist, to use as the device identification of the device that currently runs the browser.
+The rest of this subsection covers each functional block, and an AS implementation available in Python and JavaScript.
 
 % NDN-IoT client libraries
-
 \textbf{Bootstrap} follows the suggestion in section VI.B and VI.C of the IoTDI '16 paper, and helps with device and application identity setup. Its abstractions include: 
 \begin{enumerate}
 \item KeyChain setup: given a device identity (and optionally an AS name), construct a KeyChain and set up the default device certificate name for this application instance. This KeyChain is later used for signing and verification of all application data.
@@ -219,27 +208,37 @@ prefix = Name("/home/flow1/gyros")
 consumer.consume(prefix, onData, onTimeout, onVerifyFailed)
 \end{minted}
 
+% AS
+\textbf{The AS} is implemented based on the team's previous work on NDN-pi (citation: ndn-pi TR).
+The framework provides a server implementation in Python, which we run on Raspbian platform in Flow application.
+The server implementation also updates the codebase to work with PyNDN2 2.0b4, with major updates to security module interface, including using CCL library's built-in public/private key storages. \footnote{We now use BasicIdentityStorage and FilePrivateKeyStorage for key storage, and ConfigPolicyManager for data verification, whereas the old implementation, developed at a time when PyNDN security library module was evolving, used custom derived classes (for example, IotPrivateKeyStorage).}
+
+Authentication clients are available in both Python and JavaScript in order to support application components running on Ubuntu, OSX, Raspbian, and browser (Chrome and Firefox) platforms.
+Compared with the earlier work in NDN-pi, this implementation added a port in JavaScript to support browser applications. 
+The JavaScript port uses the library's IndexedDbIdentityStorage and IndexedDbPrivateKeyStorage for key storage (this means the key storage in browser is origin-based, thus in our installation the webpage that adds this ``device'' and the webpage that publishes application content should be hosted under the same origin). 
+Recall that in NDN-pi the client device generates a device ID\footnote{The server uses this ID to construct the initial ``add device'' interest name. This ID was implemented as the CPU serial of a Raspberry Pi.}. 
+In browser application's case we generate a random string in IndexedDB if one doesn't already exist, to use as the device identification of the device that currently runs the browser.
+
 \subsection{Flow application components}
 
 % Subsystems
 In our application prototype, each of the components is implemented as the following:
 \begin{enumerate}
-\item \textit{Indoor positioning}: We use OpenPTrack,\footnote{\url{http://openptrack.org/about/}} a multi-camera person tracking system.
-The NDN producer for OpenPTrack\footnote{\url{https://github.com/OpenPTrack/ndn-opt/}} (written in C++)  publishes the position of each person at a 30Hz rate, along with lower rate metadata about active tracks. 
-% Interest pipelining and an application-level Pending Interest Table are used for real-time delivery of position data.
-% Dealing with constrained devices: better in design or implementation? deserve its own paragraph and figure?
-\item \textit{Wearable sensing}: We use an RFduino 22301 with gyroscope MPU6050 attached to provide virtual camera control. 
-The RFduino cannot perform asynchronous signing operations quickly enough, so we introduced a Raspberry Pi controller as a gateway for bridging RFduino to the NDN home network.
-The data exchanged between RFduino and Raspberry Pi is signed with a shared secret key negotiated after Bluetooth pairing.
-The Raspberry Pi generates a public/private key pair on behalf of the RFduino to be associated with the RFduino's device identity.
+\item \textbf{Indoor positioning}: We use OpenPTrack,\footnote{\url{http://openptrack.org/about/}} a multi-camera person tracking system.
+The NDN producer for OpenPTrack\footnote{\url{https://github.com/OpenPTrack/ndn-opt/}} (written in C++) publishes the position of each person at a 30Hz rate, along with lower rate metadata about active tracks. 
+A consumer of track data first fetches the active track IDs contained in the metadata, named in a timestamp namespace, and then uses the IDs to construct interest names to fetch the actual position.
+The interest and data exchange in process is shown in Figure~\ref{fig:message-flow-in-flow-installation}, between the visualization component and the indoor positioning components (key 1A and 1B).
+\item \textbf{Wearable sensing}: We use an RFduino 22301 with gyroscope MPU6050 attached to provide virtual camera control. 
+The RFduino follows the pattern for constrained devices described in Section~\ref{sec:components}, so we introduced a Raspberry Pi controller as its gateway.
 The RFduino runs a minimum NDN producer, implemented with the ndn-cpp-lite library\footnote{\url{https://github.com/named-data/ndn-cpp/}}, which generates data at roughly 2Hz rate.
-When new data is generated, the RFduino pushes the data (signed by the pre-negotiated shared secret) to the Raspberry Pi controller over the Bluetooth LE channel.
-The controller receives the data, repackages the data and signs the data using RFduino's private key, and then publishes the data on the home network.
-The RFduino data publishing process is shown in Fig.~\ref{fig:contrained-devices-bootstrap}.
-% More reasons needed for matching between IDs?
-\item \textit{Mobile phone interface}: We employ an Android phone that loads a control webpage (written in JavaScript) in a mobile browser to interact with the virtual environment. 
-The phone sends out two types of command Interests: the first one matches an OpenPTrack track ID with that of the mobile, and the second one drops an image onto the virtual environment where the user's avatar is standing. ID matching is introduced so that the visualization knows the location of the user's avatar (identified by a track ID) when an image drop command Interest is issued by the same user (identified by the mobile's ID).
-\item \textit{Visualization}: We use the Unity3D\footnote{\url{https://unity3d.com}} game engine for visualization.
+This process is shown in Fig.~\ref{fig:contrained-devices-bootstrap}.
+
+Message exchanged between the Raspberry Pi gateway and the rest of the system is shown in Figure~\ref{fig:message-flow-in-flow-installation}.
+\item \textbf{Mobile phone interface}: We employ an Android phone that loads a control webpage (written in JavaScript) in a mobile browser to interact with the virtual environment. 
+The phone sends out two types of command Interests: the first one matches an OpenPTrack track ID with that of the mobile, and the second one drops an image onto the virtual environment where the user's avatar is standing. 
+ID matching is introduced so that the visualization knows the location of the user's avatar (identified by a track ID) when an image drop command Interest is issued by the same user (identified by the mobile's ID).
+Keys 2A and 2B in Figure~\ref{fig:message-flow-in-flow-installation} reflects these two types of command interests.
+\item \textbf{Visualization}: We use the Unity3D\footnote{\url{https://unity3d.com}} game engine for visualization.
 The game engine runs C\# NDN data consumers that receive person tracking and virtual camera control data, and a producer that receives image dropping command Interests from the mobile web interface.
 \end{enumerate}
 

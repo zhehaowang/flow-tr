@@ -1,12 +1,22 @@
 %% abstract
-Many emerging IoT approaches depend on cloud services to facilitate interoperation of devices and services within them, even when the primary need for communication is local in scope, as in many ``smart home'' applictions.
-While such designs offer a convenient way to implement IoT applications using today's TCP/IP Internet architecture, they also introduce dependencies between  applications and Internet connectivity that are unnecessary and often brittle.
-% danger for users to lose access to their homes if the Internet goes down. 
-This paper uses the design of an IoT-enabled home entertainment experience to demonstrate how the Named Data Networking (NDN) architecture enables cloud-independent IoT applications.
-It does so by enabling local trust management and rendezvous, which play a foundational role in realizing other IoT services.  By employing application-defined naming rather than host-based addressing at the network layer, and securing data directly,
-NDN enables straightforward and robust implementation of these two core functions for IoT networks with or without cloud connectivity.
-%Further, the architecture's intrinsic support for ad hoc and potentially intermittent connectivity enables these functions to existing robustly among home IoT devices with or without cloud connectivity. 
-%NDN intrinsically supports local, ad hoc, and potentially intermittent connectivity, robustly enabling this functionality among home IoT devices.
-At the same time, 
-NDN-based IoT designs can also employ cloud services to complement local system capabilities.  After describing the motivation, design, and preliminary generalization of the driver application, the paper concludes with a brief comparison with how it would be achieved using two popular IoT frameworks, Amazon's AWS IoT service and the Apple HomeKit framework.
-%However, we believe it is critically important that home applications do not depend on cloud, to achieve resilient local operations independent from external failures.
+In this report we introduce the application Flow, a prototype home entertainment experience built using Named Data Networking (NDN).
+Flow provides an exploratory experience in which a player navigates and interacts with a virtual environment via person tracking (OpenPTrack), wearable devices (gyroscope), and their mobile phone.
+
+Through this application we showed an approach to achieve two fundamental functions in IoT, trust management and rendezvous, in a way that does not rely on (but can incorporate) cloud-based services.
+At the heart of the design are application-defined hierarchically named and secured data packets exchanged at the networking level, from which trust management and rendezvous can be built. 
+
+To develop Flow, we designed and implemented the Named Data Networking of Things (NDN-IoT) framework, libraries in multiple languages that implement naming, trust and bootstrap, discovery, and application level pub/sub, to explore IoT-based application development in a home environment.
+
+While a high-level description of the framework and application can be found in the author's IOTDI 2017 invited paper, this report describes more lower-level details, including library workflow and interfaces, and application scenarios.
+
+% Many emerging IoT approaches depend on cloud services to facilitate interoperation of devices and services within them, even when the primary need for communication is local in scope, as in many ``smart home'' applictions.
+% While such designs offer a convenient way to implement IoT applications using today's TCP/IP Internet architecture, they also introduce dependencies between  applications and Internet connectivity that are unnecessary and often brittle.
+% % danger for users to lose access to their homes if the Internet goes down. 
+% This paper uses the design of an IoT-enabled home entertainment experience to demonstrate how the Named Data Networking (NDN) architecture enables cloud-independent IoT applications.
+% It does so by enabling local trust management and rendezvous, which play a foundational role in realizing other IoT services.  By employing application-defined naming rather than host-based addressing at the network layer, and securing data directly,
+% NDN enables straightforward and robust implementation of these two core functions for IoT networks with or without cloud connectivity.
+% %Further, the architecture's intrinsic support for ad hoc and potentially intermittent connectivity enables these functions to existing robustly among home IoT devices with or without cloud connectivity. 
+% %NDN intrinsically supports local, ad hoc, and potentially intermittent connectivity, robustly enabling this functionality among home IoT devices.
+% At the same time, 
+% NDN-based IoT designs can also employ cloud services to complement local system capabilities.  After describing the motivation, design, and preliminary generalization of the driver application, the paper concludes with a brief comparison with how it would be achieved using two popular IoT frameworks, Amazon's AWS IoT service and the Apple HomeKit framework.
+% %However, we believe it is critically important that home applications do not depend on cloud, to achieve resilient local operations independent from external failures.

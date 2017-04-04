@@ -1,0 +1,15 @@
+\section{Conclusion and Future Work}
+\label{sec:conclusion}
+
+This report describes the design and implementation of Flow, an IoT home entertainment experience, and NDN-IoT framework, a set of libraries built to facilitate the development of IoT applications.
+
+Their design showed a cloudless approach to two fundamental functions in IoT, trust management and rendezvous, both achieved by exchanging application-defined hierarchically named and secured data packets at the networking level.
+
+We implemented the framework and application, and demonstrated a prototype in Huawei in early 2017.
+% During the implementation we also expanded the functionality of NDN-CCL, and identified and fixed bugs in multiple CCL libraries.
+
+Further tasks remain for both the framework and the application. 
+Data access control should be introduced in the framework. The NDN team has proposed an encryption based access control mechanism in \cite{nbac}, which is a good starting point for experimenting inside the framework.
+Discovery mechanism in the framework stands to be improved. For simplicity in implementation, current mechanism constantly does ChronoSync recovery, whose efficiency can be improved by, for example, using ChronoSync directly as one-level of indirection for name discovery.
+Library interface may require more thoughts. With more applications using the framework, we can better identify what abstraction are easier for application developers, or what other general application building blocks can be added to the framework.
+Finally, more efforts are required in testing the framework and application, and improving their robustness, for example, although the design conceptually supports more levels in the trust relationship, this feature is not yet tested by any application components.

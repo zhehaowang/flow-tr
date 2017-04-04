@@ -135,11 +135,11 @@ The workflow of both is shown in Figure~\ref{fig:application-level-pub-sub}.
 \subsection{Supporting constrained devices}
 
 Flow application involves a producer running on constrained devices not powerful enough to perform asymmetric signing operations quickly, and may not have a forwarder implementation dedicated to their platforms. 
-For those devices we introduce a helper that bridges them to the NDN home network.
+For those devices we introduce a gateway that bridges them to the NDN home network.
 
-In the framework, the pairing between constrained device and its helper is established using a shared secret key, manually put into both devices (not unlike the device onboarding step between a device and the AS).
-The helper then generates a public/private key pair on behalf of the constrained device to be associated with the latter's device identity.
-The constrained device may run a simple publisher which pushes data (signed by the shared secret) to the helper, and the helper repackages the data and signs the data using constrained device's private key, and then publishes the data on the home network.
+In the framework, the pairing between constrained device and its gateway is established using a shared secret key, manually put into both devices (not unlike the device onboarding step between a device and the AS).
+The gateway then generates a public/private key pair on behalf of the constrained device to be associated with the latter's device identity.
+The constrained device may run a simple publisher which pushes data (signed by the shared secret) to the gateway, and the gateway repackages the data and signs the data using constrained device's private key, and then publishes the data on the home network.
 
 An example of this pattern is described in Section~\ref{sec:implementation}.
 
