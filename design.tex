@@ -50,7 +50,7 @@ Then, it is configured with one or more application-level names for its data, an
 Finally, the device is configured to respond to requests in application namespaces. 
 
 The authentication server acts as the trust anchor. It can be coordinated with but does not depend on a remote cloud services.
-While the devices and users may have public identities outside the home environment, they all need to obtain local identities that are certified by the AS before they can start interacting with other local entities.\footnote{The public identities may be used to assist the onboarding process, but will not be required for local communication once the initial configuration has finished.
+While the devices and users may have public identities outside the home environment, they all need to obtain local identities that are certified by the AS before they can start interacting with other local entities.\footnote{The public identities may be used to assist the onboarding process, but will not be required for local communication once the initial configuration has finished.}
 
 The process of establishing a trust relationship between a new device and the home through the AS is similar to the Bluetooth pairing process.
 To bootstrap a new device, the user---or a configuration application on his/her behalf---provides a shared secret and a local device name.  The shared secret may be a device barcode, identity communicated by NFC, or simply a PIN number. 
@@ -86,7 +86,6 @@ The producer authorization process, as well as an example of the resulting trust
 \caption{Schematized trust between producers and consumers.}
 \label{fig:flow-app-authorization-trust-relationship}
 \end{figure}
-
 
 \subsection{Rendezvous}
 \label{sec:rendezvous}

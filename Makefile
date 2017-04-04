@@ -1,10 +1,10 @@
 PAPER=ndn-flow-tr
 
 all:
-	pdflatex $(PAPER).tex
+	pdflatex --shell-escape $(PAPER).tex
 	bibtex $(PAPER)
-	pdflatex $(PAPER).tex
-	pdflatex $(PAPER).tex
+	pdflatex --shell-escape $(PAPER).tex
+	pdflatex --shell-escape $(PAPER).tex
 
 view: open
 open: all

@@ -31,13 +31,164 @@ They are organized into three major functional blocks:
 \item Producer setup: given an application prefix, the Bootstrap module requests authorization from the AS to publish under that prefix by sending a command interest including this device's identity and the prefix it wants to publish for (add example). If the AS authorizes the request, it adds an entry stating to the application trust schema to reflect the updated trust relationship, and publishes a new version for all consumers to fetch.
 \end{enumerate}
 
-In practice, the code to bootstrap a new device may look like the following:
+In practice, the application code to set up a gyroscope data producer on a Raspberry Pi may look like the following.
+\begin{minted}
+[frame=lines,
+framesep=2mm,
+baselinestretch=1,
+fontsize=\footnotesize,
+breaklines
+]{python}
+from ndn_iot_python import Bootstrap
+deviceName = Name("/AliceHome/devices/rpi2")
+dataPrefix = Name("/AliceHome/flow1/gyros")
+appName = "flow1"
+face = Face()
+bootstrap = Bootstrap(face)
+bootstrap.setupDefaultIdentityAndRoot(deviceName, onSetupComplete, onSetupFailed)
 
-And in Flow application, a trust schema built by the AS may look like the following:
-(trust schema example)
+def onSetupComplete(certificateName, keyChain)
+  bootstrap.requestProducerAuthorization(dataPrefix, appName, onRequestSuccess, onRequestFailed)
 
-\textbf{Discovery} uses a sync-based discovery different from suggested in section VI.B of the IoTDI '16 paper. 
-(Protocol description)
+def onSetupFailed(message)
+  print(message)
+\end{minted}
+
+And in a Flow application instance ``flow1'', a trust schema built by the AS may contain the following sections.
+\begin{minted}[frame=lines,
+framesep=2mm,
+baselinestretch=1,
+fontsize=\footnotesize,
+breaklines
+]{text}
+trust-anchor 
+{
+  type "base64"
+  base64-string "Bv0DD..."
+}
+\end{minted}
+Trust anchor certificate is installed during the bootstrap process.
+This rule is automatically populated by the AS.
+
+\begin{minted}[frame=lines,
+framesep=2mm,
+baselinestretch=1,
+fontsize=\footnotesize,
+breaklines
+]{text}
+rule 
+{
+  id "Certs"
+  for "data"
+  filter 
+  {
+    type "regex"
+    regex "^[^<KEY>]*<KEY><>*<ID-CERT>"
+  }
+  checker 
+  {
+    type "customized"
+    sig-type "rsa-sha256"
+    key-locator 
+    {
+      type "name"
+      name "/AliceHome/devices/gateway/KEY/ksk
+-1485314801/ID-CERT"
+      relation "equal"
+    }
+  }
+}
+\end{minted}
+This rule mandates that all certificates should be signed by the gateway.\footnote{In this iteration of Flow, device certicates are the only type of certificate involved in the trust relationship in Section~\ref{sec:trust-management}.}
+This rule is automatically populated by the AS.
+
+\begin{minted}[frame=lines,
+framesep=2mm,
+baselinestretch=1,
+fontsize=\footnotesize,
+breaklines
+]{text}
+rule 
+{
+  id "discovery-data"
+  for "data"
+  filter 
+  {
+    type "regex"
+    regex "^[^<discovery>]*<discovery><>*"
+  }
+  checker 
+  {
+    type "customized"
+    sig-type "rsa-sha256"
+    key-locator 
+    {
+      type "name"
+      regex "^[^<KEY>]*<KEY><>*<ID-CERT>"
+    }
+  }
+}
+\end{minted}
+This rule mandates that all discovery data should be signed. 
+This rule is automatically populated by the AS.
+
+\begin{minted}[frame=lines,
+framesep=2mm,
+baselinestretch=1,
+fontsize=\footnotesize,
+breaklines
+]{text}
+rule 
+{
+  id "/AliceHome/flow1/gyros"
+  for "data"
+  filter 
+  {
+    type "name"
+    name "/AliceHome/flow1/gyros"
+    relation "is-prefix-of"
+  }
+  checker 
+  {
+    type "customized"
+    sig-type "rsa-sha256"
+    key-locator 
+    {
+      type "name"
+      name "/AliceHome/devices/rpi2/KEY/dsk-
+1485374576/ID-CERT"
+      relation "equal"
+    }
+  }
+}
+\end{minted}
+This rule mandates that data under application prefix \ndnName{/AliceHome/flow1/gyros} should be signed by device \ndnName{/AliceHome/devices/rpi2}.
+This rule is added to the trust schema after the AS approves the request from \ndnName{/AliceHome/devices/rpi2}.
+
+\textbf{Discovery} uses a simple sync-based discovery similar to ChronoSync recovery mechanism.
+
+In practice, after setting up the Bootstrap object, the application may use the following code to include a discovery module.
+\begin{minted}[frame=lines,
+framesep=2mm,
+baselinestretch=1,
+fontsize=\footnotesize,
+breaklines
+]{python}
+from ndn_iot_python import Discovery, Observer
+
+class MyObserver(Observer):
+  def onDiscovered(name, description):
+    print(name.toUri() + description)
+
+keyChain = bootstrap.getKeyChain()
+certName = bootstrap.getDefaultCertificateName()
+syncPrefix = Name("/AliceHome/discovery")
+discovery = Discovery(face, keyChain, certName, syncPrefix, MyObserver())
+
+description = "My Raspberry Pi device"
+deviceName = Name("/home/devices/rpi2")
+discovery.publishObject(deviceName, description)
+\end{minted}
 
 \textbf{Application-level pub/sub} follows the suggestion in section VI.F of the IoTDI '16 paper, and provides the following abstractions:
 \begin{enumerate}
@@ -45,7 +196,21 @@ And in Flow application, a trust schema built by the AS may look like the follow
 \item Consumer for sequence-number namespace (/prefix/[sequence-number]): this consumer pipelines interest for the next few sequence numbers, and upon data retrieval and successful verification, issues an interest for the sequence number after the last one in the pipeline.
 \end{enumerate}
 
-(discuss callback mechanisms?)
+In practice, after setting up the Bootstrap object, the application may use the following code to include a sequence number consumer module.
+
+\begin{minted}[frame=lines,
+framesep=2mm,
+baselinestretch=1,
+fontsize=\footnotesize,
+breaklines
+]{python}
+from ndn_iot_python import AppConsumerSequenceNumber
+keyChain = bootstrap.getKeyChain()
+pipelineSize = 5
+consumer = AppConsumerSequenceNumber(face, keyChain, pipelineSize)
+prefix = Name("/home/flow1/gyros")
+consumer.consume(prefix, onData, onTimeout, onVerifyFailed)
+\end{minted}
 
 \subsection{Flow application components}
 
