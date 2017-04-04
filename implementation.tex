@@ -182,7 +182,7 @@ class MyObserver(Observer):
 
 keyChain = bootstrap.getKeyChain()
 certName = bootstrap.getDefaultCertificateName()
-syncPrefix = Name("/AliceHome/discovery")
+syncPrefix = Name("/AliceHome/discovery/devices")
 discovery = Discovery(face, keyChain, certName, syncPrefix, MyObserver())
 
 description = "My Raspberry Pi device"
