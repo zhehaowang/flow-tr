@@ -112,3 +112,34 @@ Once an application obtains the name prefix of the target device or application,
 \end{figure}
 
 NDN-IoT provides an implementation of this distributed discovery mechanism, whose details are further described in Section~\ref{sec:implementation}.
+
+\subsection{Application-level pub/sub}
+
+Pub/sub is identified recurring pattern in applications cite:iotdi-2016.
+To facilitate application development NDN-IoT framework implements application-level pub/sub in two commonly used namespaces: 
+
+\textbf{Sequence-number namespace}, in which producer publishes time series data whose last name component is a consecutive sequence number. The framework pipelines interest with the sequence numbers of the next few data packets in this namespace.
+
+\textbf{Timestamp namespace}, in which data's last name is a timestamp. The framework uses outstanding interest and range exclusion to fetch the next piece of content.
+\footnote{If exclusion filter is deprecated, the framework could switch to using a manifest of data names for consuming in a timestamp namespace}
+
+The workflow of both is shown in Figure~\ref{fig:application-level-pub-sub}.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.95\columnwidth]{app-pubsub-namespaces.pdf}
+\caption{Application-level pub/sub in NDN-IoT framework.}
+\label{fig:flow-discovery-process}
+\end{figure}
+
+\subsection{Supporting constrained devices}
+
+Flow application involves a producer running on constrained devices not powerful enough to perform asymmetric signing operations quickly, and may not have a forwarder implementation dedicated to their platforms. 
+For those devices we introduce a helper that bridges them to the NDN home network.
+
+In the framework, the pairing between constrained device and its helper is established using a shared secret key, manually put into both devices (not unlike the device onboarding step between a device and the AS).
+The helper then generates a public/private key pair on behalf of the constrained device to be associated with the latter's device identity.
+The constrained device may run a simple publisher which pushes data (signed by the shared secret) to the helper, and the helper repackages the data and signs the data using constrained device's private key, and then publishes the data on the home network.
+
+An example of this pattern is described in Section~\ref{sec:implementation}.
+

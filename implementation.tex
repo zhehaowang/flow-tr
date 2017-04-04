@@ -1,13 +1,23 @@
 \section{Implementation}
 \label{sec:implementation}
 
-We have implemented the NDN-IoT framework and a prototype of the Flow entertainment experience to verify the design introduced in the previous section.
-The implementation follows a modular structure and differentiates between the framework-level services that we believe are common to many home IoT systems and the functionality that supports Flow-specific application logic.
+We implemented the NDN-IoT framework and a prototype of Flow application separately.
 This section describes details in both the framework and application components.
 
 \subsection{NDN-IoT framework}
 
-The NDN-IoT framework includes an implementation of the authentication server and a set of client libraries.
+The NDN-IoT framework is a set of libraries in Python, C++, JS and C\# built on top of the NDN Common Client Libraries.
+Each library in the framework implements the naming, trust management and rendezvous in Section~\ref{sec:components} from three functional blocks: bootstrap, discovery and application-level pub/sub.
+The overall structure of the framework is shown in Figure~\ref{fig:ndn-iot-framework-structure}.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.95\columnwidth]{ndn-iot-structure.pdf}
+\caption{The structure of NDN-IoT framework.}
+\label{fig:ndn-iot-framework-structure}
+\end{figure}
+
+The rest of this subsection covers each functional block, and a description of the AS implementation available in Python and JavaScript.
 
 % AS
 The AS functionality is implemented based on the team's previous work on NDN-pi (citation: ndn-pi TR).
@@ -20,9 +30,6 @@ Recall that in NDN-pi the client device generates a device ID\footnote{The serve
 In browser application's case we generate a random string in IndexedDB if one doesn't already exist, to use as the device identification of the device that currently runs the browser.
 
 % NDN-IoT client libraries
-The NDN-IoT client libraries are built on top of the NDN Common Client Libraries~\cite{ccl}, and aims to provide abstractions to faciliate application development in a home environment. 
-The client libraries are available in Python, C++, JavaScript and C\#. 
-They are organized into three major functional blocks:
 
 \textbf{Bootstrap} follows the suggestion in section VI.B and VI.C of the IoTDI '16 paper, and helps with device and application identity setup. Its abstractions include: 
 \begin{enumerate}
@@ -251,3 +258,5 @@ The implementation for both NDN-IoT framework and Flow application are available
 \caption{Application components and message flows in Flow}
 \label{fig:message-flow-in-flow-installation}
 \end{figure*}
+
+
