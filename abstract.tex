@@ -1,9 +1,9 @@
 %% abstract
-In this report we introduce the application Flow, a prototype home entertainment experience built using Named Data Networking (NDN). Flow provides an exploratory experience in which a player navigates and interacts with a virtual environment via person tracking (OpenPTrack), wearable devices (gyroscope), and their mobile phone. 
+In this report we introduce the application Flow, a prototype home entertainment experience built using Named Data Networking (NDN). Flow provides an exploratory experience in which a player navigates and interacts with a virtual environment via person tracking, wearable devices, and mobile phones. 
 Through this application we showed an approach to achieve two fundamental functions in IoT, trust management and rendezvous, in a way that does not rely on (but can incorporate) cloud-based services.
 At the heart of the design are application-defined hierarchically named and secured data packets exchanged at the networking level, from which trust management and rendezvous can be built. 
-To develop Flow, we designed and implemented the Named Data Networking of Things (NDN-IoT) framework, libraries in multiple languages that implement naming, trust and bootstrap, discovery, and application level pub/sub, to explore IoT-based application development in a home environment.
-While a high-level design of the framework and application can be found in the author's IOTDI 2017 invited paper, this report focuses on low-level details, including library workflow and interfaces, with in-application examples.
+To develop Flow, we designed and implemented the Named Data Networking of Things (NDN-IoT) framework, libraries in multiple languages that implement naming, trust and bootstrap, discovery, and application level pub/sub, to explore IoT-based application development.
+While a high-level insights can be found in the authors' IOTDI 2017 invited paper, this report focuses on low-level details, including library workflow and interfaces, with in-application examples.
 
 % Many emerging IoT approaches depend on cloud services to facilitate interoperation of devices and services within them, even when the primary need for communication is local in scope, as in many ``smart home'' applictions.
 % While such designs offer a convenient way to implement IoT applications using today's TCP/IP Internet architecture, they also introduce dependencies between  applications and Internet connectivity that are unnecessary and often brittle.
