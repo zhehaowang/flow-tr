@@ -188,7 +188,7 @@ syncPrefix = Name("/AliceHome/discovery/devices")
 discovery = Discovery(face, keyChain, certName, syncPrefix, MyObserver())
 
 description = "My Raspberry Pi device"
-deviceName = Name("/home/devices/rpi2")
+deviceName = Name("/AliceHome/devices/rpi2")
 discovery.publishObject(deviceName, description)
 \end{minted}
 
@@ -210,7 +210,7 @@ from ndn_iot_python import AppConsumerSequenceNumber
 keyChain = bootstrap.getKeyChain()
 pipelineSize = 5
 consumer = AppConsumerSequenceNumber(face, keyChain, pipelineSize)
-prefix = Name("/home/flow1/gyros")
+prefix = Name("/AliceHome/flow1/gyros")
 consumer.consume(prefix, onData, onTimeout, onVerifyFailed)
 \end{minted}
 
